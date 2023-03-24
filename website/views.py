@@ -28,10 +28,12 @@ def home():
 					return("Guest registered!")					
 				else:
 					flash("Invalid or already registered code", category='error')
-					return render_template("home.html", user=current_user)					
+					return render_template("home.html", user=current_user)
+						
 		else:
 			flash("Invalid email address or name.", category='error')
 			return render_template("register.html", user=current_user, code=input_code)
+
 
 	elif request.args.get('code') !=None:
 		input_code = request.args.get('code').upper()
@@ -58,7 +60,6 @@ def home():
 def admin():
 	return render_template("admin.html", user=current_user)
 
-
 @views.route('/guestlist', methods=['GET'])
 @login_required
 def guestlist():
@@ -68,18 +69,20 @@ def guestlist():
 	if request.args.get('search') != None:
 		search = request.args.get('search')
 		if search == "":
-			guestlist = Guest.query.filter_by(code_used=True).order_by(Guest.name).paginate()
+			guestlist = Guest.query.filter_by(code_used=True).order_by(Guest.name).paginate(page=page, per_page=rows)
 		elif is_valid_string(search):		
 			guestlist = Guest.query.filter_by(invitecode=search+"\n").order_by(Guest.name).paginate(page=page, per_page=rows)
 			if not guestlist.items:
 				search = "%{}%".format(search)
 				guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
 			if not guestlist.items:
-				guestlist = Guest.query.filter(Guest.reg_email.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)	
+				guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
+		
 		else:
 			guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
 	else:
-		guestlist = Guest.query.filter_by(code_used=True).order_by(Guest.name).paginate()
+		guestlist = Guest.query.filter_by(code_used=True).order_by(Guest.name).paginate(page=page, per_page=rows)
+		
 	return render_template("guestlist.html", guestlist=guestlist, user=current_user)
 
 

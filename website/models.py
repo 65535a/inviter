@@ -7,10 +7,11 @@ class User(db.Model, UserMixin):
 	email = db.Column(db.String(150), unique=True)
 	password = db.Column(db.String(150))
 	first_name = db.Column(db.String(150))
+	admin = db.Column(db.Boolean(False))
 
-class Registrant(db.Model):
+class Guest(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	invitecode = db.Column(db.String(150), unique=True)
+	name = db.Column(db.String(150))
 	reg_email = db.Column(db.String(150), unique=True)
-	used = db.Column(db.Boolean(False))
-	
+	code_used = db.Column(db.Boolean(False))

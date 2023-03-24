@@ -20,7 +20,7 @@ def create_app():
 	app.register_blueprint(views, url_prefix='/')
 	app.register_blueprint(auth, url_prefix='/')
 
-	from .models import User, Registrant
+	from .models import User, Guest
 
 	create_database(app)
 
@@ -34,13 +34,13 @@ def create_app():
 
 	with app.app_context():
 
-		db_check = Registrant.query.count()
+		db_check = Guest.query.count()
 		print("Codes in the database: "+ str(db_check))
 		if db_check <= 0:
 			print("Copying invite codes to db.")
 			codes = open("./codes.txt","r")
 			for item in codes:
-				code = Registrant(invitecode=item, reg_email=None, used=False)
+				code = Guest(invitecode=item, reg_email=None, code_used=False)
 				db.session.add(code)
 				db.session.commit()
 
@@ -53,7 +53,7 @@ def create_app():
 		if user:
 			return app
 		else:
-			new_user = User(email=admin_email, first_name=admin_name, password=generate_password_hash(admin_pass, method='sha256'))
+			new_user = User(email=admin_email, first_name=admin_name, password=generate_password_hash(admin_pass, method='sha256'), admin=True)
 			db.session.add(new_user)
 			db.session.commit()
 
@@ -67,11 +67,16 @@ def create_database(app):
 
 def is_valid_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    match = re.match(pattern, email)
-    return match is not None
+    return re.match(pattern, email) is not None
+    #return match is not None
 
-def is_valid_string(s):
-	for c in s:
-		if not c.isalnum():
-			return False
-	return True
+def is_valid_string(inputString):
+    pattern = r'^[a-zA-Z0-9öä]'
+    return re.match(pattern, inputString) is not None
+
+'''
+def is_valid_string(inputString):
+	pattern = re.compile('[^a-zA-Z0-9 ]+')
+	return pattern.search(inputString) is None
+'''
+	

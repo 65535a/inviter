@@ -1,14 +1,5 @@
 {% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %}
 
-<H1>Registered codes</H1>
-
-<ul class="list-group list-group-flush" id="notes">
-	{% for Registrant in registrants %}
-	<li class="list-group-item">{{ Registrant.invitecode }}
-	<p>{{ Registrant.reg_email }}</p>
-	</li>
-	{% endfor %}
-</ul>
-
+<H1>This is the admin page</H1>
 
 {% endblock %}

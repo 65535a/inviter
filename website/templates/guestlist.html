@@ -1,0 +1,78 @@
+{% extends 'base.html' %} {% block title %}Guestlist{% endblock %} {% block content %}
+<H1>Guestlist</H1>
+<form>
+
+	<div class="input-group rounded">
+		
+		<input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" id="search" name="search" />
+		<button class="input-group-text border-0" id="search-addon">
+			<i class="fa fa-search"></i>
+		</button>
+	</div>
+</form>
+<div id=guestlist>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">
+					Invite code
+				</th>
+				<th scope="col">
+					Name
+				</th>
+				<th scope="col">
+					Email address
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for Guest in guestlist.items %}
+				<tr>
+					<td>
+						<p>{{ Guest.invitecode }}</p>
+					</td>
+					<td>
+						<p>{{ Guest.name }}</p>
+					</td>
+					<td>
+						<p>{{ Guest.reg_email }}</p>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<!-- Pagination Links-->
+<div class="text-left">
+	<a href="{{ url_for('views.guestlist', page=guestlist.prev_num) }}"
+		class="btn btn-outline-dark
+		{% if guestlist.page == 1 %}disabled{% endif %}">
+		&laquo;
+	</a>
+	{% for page_num in guestlist.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+		{% if page_num %}
+			{% if guestlist.page == page_num %}
+				<a href="{{ url_for('views.guestlist', page=page_num) }}"
+					class="btn btn-dark">
+					{{ page_num }}
+				</a>
+			{% else %}
+				<a href="{{ url_for('views.guestlist', page=page_num) }}"
+					class="btn btn-outline-dark">
+					{{ page_num }}
+				</a>
+			{% endif %}
+		{% else %}
+			...
+		{% endif %}
+	{% endfor %}
+	<a href="{{ url_for('views.guestlist', page=guestlist.next_num) }}"
+		class="btn btn-outline-dark
+		{% if guestlist.page == guestlist.pages %}disabled{% endif %}">
+		&raquo;
+	</a>
+</div>
+<p class="text-left mt-3">
+	Showing page {{ guestlist.page }} of {{ guestlist.pages }}
+</p>
+{% endblock %}

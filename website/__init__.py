@@ -20,7 +20,7 @@ def create_app():
 	app.register_blueprint(views, url_prefix='/')
 	app.register_blueprint(auth, url_prefix='/')
 
-	from .models import User, Guest
+	from .models import User, Guest, Settings, Stats
 
 	create_database(app)
 
@@ -34,13 +34,20 @@ def create_app():
 
 	with app.app_context():
 
-		db_check = Guest.query.count()
-		print("Codes in the database: "+ str(db_check))
-		if db_check <= 0:
+		invite_codes = Guest.query.count()
+		setting_exist = Settings.query.count()
+		stats_exist = Stats.query.count()
+		print("Codes in the database: "+ str(invite_codes))
+		print("Settings objects: "+ str(setting_exist))
+		print("Stats objects: "+ str(stats_exist))
+		settings = Settings(captcha = True)
+		stats = Stats(invite_codes = 0, registered_guests = 0, checked_in = 0)
+		if invite_codes <= 0:
 			print("Copying invite codes to db.")
 			codes = open("./codes.txt","r")
 			for item in codes:
-				code = Guest(invitecode=item, reg_email=None, code_used=False)
+				code = Guest(invitecode=item, reg_email=None, code_used=False, checked_in=False)
+				stats.invite_codes += 1
 				db.session.add(code)
 				db.session.commit()
 
@@ -55,8 +62,11 @@ def create_app():
 		else:
 			new_user = User(email=admin_email, first_name=admin_name, password=generate_password_hash(admin_pass, method='sha256'), admin=True)
 			db.session.add(new_user)
-			db.session.commit()
-
+		
+		db.session.add(settings)
+		db.session.add(stats)
+		db.session.commit()
+	
 	return app
 
 def create_database(app):

@@ -23,6 +23,9 @@
 				<th scope="col">
 					Email address
 				</th>
+				<th scope="col">
+					Checked in
+				</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -36,6 +39,16 @@
 					</td>
 					<td>
 						<p>{{ Guest.reg_email }}</p>
+					</td>
+					<td>
+						{% if not Guest.checked_in %}
+						<form action="/checkin/{{ Guest.invitecode}}">
+							<!--<input type="hidden" value={{ Guest.invitecode }} name="code">-->
+							<input type="submit" value="Check in">
+						</form>
+						{% else %}
+						<p>Checked in</p>
+						{% endif %}
 					</td>
 				</tr>
 			{% endfor %}

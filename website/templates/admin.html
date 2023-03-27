@@ -1,5 +1,17 @@
 {% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %}
 
 <H1>This is the admin page</H1>
-
+{% if not settings.captcha %}
+<form>
+	<input type="hidden" id="code" name="captcha" value=enable><br>
+	<label for="code"><h3>Captcha</h3></label><br>
+	<input type="submit" value="Enable"> 
+</form>
+{% else %}
+<form>
+	<input type="hidden" id="code" name="captcha" value=disable><br>
+	<label for="code"><h3>Captcha</h3></label><br>
+	<input type="submit" value="Disable"> 
+</form>
+{% endif %}
 {% endblock %}

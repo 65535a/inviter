@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, logout_user, current_user
 from . import db, is_valid_email, is_valid_string
-from .models import Guest
+from .models import Guest, Stats, Settings
 
 views = Blueprint('views', __name__)
 
@@ -20,7 +20,9 @@ def home():
 				return render_template("register.html", user=current_user, code=input_code)
 			else:	
 				guest = Guest.query.filter_by(invitecode=input_code+"\n").first()
-				if guest and guest.code_used == False:					
+				if guest and guest.code_used == False:
+					stats = Stats.query.first()
+					stats.registered_guests += 1
 					guest.reg_email = input_email
 					guest.name = input_name
 					guest.code_used = True
@@ -33,7 +35,6 @@ def home():
 		else:
 			flash("Invalid email address or name.", category='error')
 			return render_template("register.html", user=current_user, code=input_code)
-
 
 	elif request.args.get('code') !=None:
 		input_code = request.args.get('code').upper()
@@ -53,12 +54,25 @@ def home():
 			flash("Invalid code.", category='error')
 			return render_template("home.html", user=current_user)
 	else:
+		settings = Settings.query.first()
+		if settings.captcha == True:
+			# pistä captcha tähän
+			pass
 		return render_template("home.html", user=current_user)
 
-@views.route('/admin', methods=['GET'])
+
+@views.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-	return render_template("admin.html", user=current_user)
+	settings = Settings.query.first()
+	if request.args.get('captcha') == "enable":		
+		settings.captcha = True
+		db.session.commit()
+	else: 
+		settings.captcha = False
+		db.session.commit()
+	return render_template("admin.html", user=current_user, settings=settings)
+
 
 @views.route('/guestlist', methods=['GET'])
 @login_required
@@ -76,8 +90,7 @@ def guestlist():
 				search = "%{}%".format(search)
 				guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
 			if not guestlist.items:
-				guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
-		
+				guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)		
 		else:
 			guestlist = Guest.query.filter(Guest.name.like(search)).order_by(Guest.name).paginate(page=page, per_page=rows)
 	else:
@@ -85,4 +98,20 @@ def guestlist():
 		
 	return render_template("guestlist.html", guestlist=guestlist, user=current_user)
 
+
+@views.route('/checkin/<code>', methods=['GET'])
+@login_required
+def checkin(code):
+	guest = Guest.query.filter_by(invitecode=code+"\n").first()
+	stats = Stats.query.first()
+	stats.checked_in += 1
+	guest.checked_in = True
+	db.session.commit()
+	return redirect('/guestlist')
+
+@views.route('/stats', methods=['GET'])
+@login_required
+def stats():
+	stats = Stats.query.first()
+	return render_template("stats.html", user=current_user, stats=stats)
 

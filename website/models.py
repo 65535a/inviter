@@ -22,6 +22,7 @@ class Guest(db.Model):
 # Settings model
 class Settings(db.Model):
 	id = db.Column(db.Integer, primary_key=True, unique=True)
+	active = db.Column(db.Boolean(False))
 	captcha = db.Column(db.Boolean(False))
 
 # Statistics model

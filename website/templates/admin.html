@@ -1,17 +1,31 @@
 {% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content %}
 <!-- Admin page -->
-<H1>This is the admin page</H1>
-{% if not settings.captcha %}
+<H1>Admin</H1>
+{% if settings.active %}
 <form>
-	<input type="hidden" id="code" name="captcha" value=enable><br>
-	<label for="code"><h3>Captcha</h3></label><br>
-	<input type="submit" value="Enable"> 
+	<input type="hidden" id="code" name="active" value=false><br>
+	<label for="code"><h3>Registration form</h3></label><br>
+	<input type="submit" value="Disable"> 
 </form>
 {% else %}
 <form>
-	<input type="hidden" id="code" name="captcha" value=disable><br>
+	<input type="hidden" id="code" name="active" value=true><br>
+	<label for="code"><h3>Registration form</h3></label><br>
+	<input type="submit" value="Enable">
+</form>
+{% endif %}
+{% if settings.captcha %}
+<form>
+	<input type="hidden" id="code" name="captcha" value=false><br>
 	<label for="code"><h3>Captcha</h3></label><br>
 	<input type="submit" value="Disable"> 
 </form>
+{% else %}
+<form>
+	<input type="hidden" id="code" name="captcha" value=true><br>
+	<label for="code"><h3>Captcha</h3></label><br>
+	<input type="submit" value="Enable"> 
+</form>
 {% endif %}
+
 {% endblock %}

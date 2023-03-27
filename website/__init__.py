@@ -40,7 +40,7 @@ def create_app():
 		print("Codes in the database: "+ str(invite_codes))
 		print("Settings objects: "+ str(setting_exist))
 		print("Stats objects: "+ str(stats_exist))
-		settings = Settings(captcha = True)
+		settings = Settings(captcha = False, active = False)
 		stats = Stats(invite_codes = 0, registered_guests = 0, checked_in = 0)
 		if invite_codes <= 0:
 			print("Copying invite codes to db.")

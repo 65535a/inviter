@@ -7,7 +7,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-	
+	settings = Settings.query.first()
 	if request.args.get('code') !=None and request.args.get('email') !=None and request.args.get('name') !=None:
 		input_code = request.args.get('code')
 		input_email = request.args.get('email')
@@ -17,7 +17,7 @@ def home():
 			guest = Guest.query.filter_by(reg_email=input_email).first()
 			if guest != None:
 				flash("Email already registered", category='error')
-				return render_template("register.html", user=current_user, code=input_code)
+				return render_template("register.html", user=current_user, code=input_code, settings=settings)
 			else:	
 				guest = Guest.query.filter_by(invitecode=input_code+"\n").first()
 				if guest and guest.code_used == False:
@@ -30,11 +30,11 @@ def home():
 					return("Guest registered!")					
 				else:
 					flash("Invalid or already registered code", category='error')
-					return render_template("home.html", user=current_user)
+					return render_template("home.html", user=current_user, settings=settings)
 						
 		else:
 			flash("Invalid email address or name.", category='error')
-			return render_template("register.html", user=current_user, code=input_code)
+			return render_template("register.html", user=current_user, code=input_code, settings=settings)
 
 	elif request.args.get('code') !=None:
 		input_code = request.args.get('code').upper()
@@ -42,35 +42,44 @@ def home():
 			guest = Guest.query.filter_by(invitecode=input_code+"\n").first()
 		else:
 			flash("Invalid code.", category='error')
-			return render_template("home.html", user=current_user) 
+			return render_template("home.html", user=current_user, settings=settings) 
 		if guest:
 			if guest.code_used == False:
 				flash("Code correct!", category='success')
-				return render_template("register.html", user=current_user, code=guest.invitecode)
+				return render_template("register.html", user=current_user, code=guest.invitecode, settings=settings)
 			else:
 				flash("Code already registered!", category='error') 
 				return redirect(url_for('views.home'))
 		else:
 			flash("Invalid code.", category='error')
-			return render_template("home.html", user=current_user)
+			return render_template("home.html", user=current_user, settings=settings)
 	else:
-		settings = Settings.query.first()
+		
 		if settings.captcha == True:
 			# Put captcha here
 			pass
-		return render_template("home.html", user=current_user)
+		return render_template("home.html", user=current_user, settings=settings)
 
 
 @views.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
 	settings = Settings.query.first()
-	if request.args.get('captcha') == "enable":		
+	if request.args.get('active') == "true":		
+		settings.active = True
+		db.session.commit()
+	elif request.args.get('active') == "false":
+		settings.active = False
+		db.session.commit()
+	elif request.args.get('captcha') == "true":		
 		settings.captcha = True
 		db.session.commit()
-	else: 
+	elif request.args.get('captcha') == "false":
 		settings.captcha = False
 		db.session.commit()
+
+	else:
+		pass
 	return render_template("admin.html", user=current_user, settings=settings)
 
 

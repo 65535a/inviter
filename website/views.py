@@ -56,7 +56,7 @@ def home():
 	else:
 		settings = Settings.query.first()
 		if settings.captcha == True:
-			# pistä captcha tähän
+			# Put captcha here
 			pass
 		return render_template("home.html", user=current_user)
 
